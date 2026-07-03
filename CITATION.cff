@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+title: "Inference Substrate: A Minimal Parity‑Driven Collapse Model"
+message: "If you use this software in your research, please cite it using the following metadata."
+
+authors:
+  - family-names: "Nyhan"
+    given-names: "Patrick D."
+
+abstract: >
+  A minimal simulation framework demonstrating how parity‑based collapse laws
+  emerge from independent rare‑event transitions. Includes both the full chain
+  simulation and the minimal Appendix A parity demonstration.
+
+keywords:
+  - inference substrate
+  - parity collapse
+  - rare-event chains
+  - simulation
+  - collapse law
+
+license: "PolyForm-Noncommercial-1.0.0"
+version: "1.0.0"
+date-released: "2026-07-01"
+
+repository-code: "https://github.com/Patrickofthewoods/inference-substrate"
