@@ -2,6 +2,9 @@
 
 A minimal, parity-driven simulation toolkit for rare-event transitions — verified against real physics, not just simulated in isolation.
 
+## Status
+Active development — substrate behavior is still under testing.
+
 ## What this repo actually does
 
 Two things, both verified and reproducible:
