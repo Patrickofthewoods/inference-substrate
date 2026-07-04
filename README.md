@@ -1,6 +1,26 @@
 # Inference Substrate
 
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![License](https://img.shields.io/badge/License-PolyForm%20Noncommercial-orange.svg)
+![Release](https://img.shields.io/badge/Release-One--Time-green.svg)
+![Model](https://img.shields.io/badge/Model-Parity--Driven-black.svg)
+
 A minimal, composable, parity‑driven simulation framework for studying rare‑event transitions, collapse behavior, and physics‑grounded escape dynamics.
+
+## Motivation
+
+Most collapse or inference models rely on domain‑specific assumptions: quantum rules, biological constraints, neural architectures, or bespoke stochastic processes. The Inference Substrate takes the opposite approach. It asks:
+
+> What is the simplest possible collapse law that still produces meaningful structure?
+
+The answer is a parity law emerging from independent rare‑event transitions. This repo demonstrates that:
+
+- parity collapse is domain‑agnostic
+- it arises from minimal assumptions
+- it matches analytic predictions exactly
+- and when grounded in physics (via Kramers escape‑rate theory), it remains empirically correct within known theoretical bounds
+
+The substrate is intentionally small. Its purpose is to show how much structure emerges from how little machinery — and to provide a clean, reproducible reference implementation for research, teaching, and conceptual exploration.
 
 ## Overview
 
