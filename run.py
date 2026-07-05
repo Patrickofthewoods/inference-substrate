@@ -1,59 +1,46 @@
 # run.py
 
-from substrate.primitive_api import PrimitiveAPI, ValidOp, ContextFrame
-from substrate.collapse_primitives import NoSame, NoDiff, CompositeCollapse
-
-class SimpleTelemetry:
-    def ingest(self, raw):
-        prev, curr = raw
-        return ContextFrame(previous=prev, current=curr)
-
-class DummyAscent:
-    def apply(self, frame, payload):
-        frame.value = payload
-        return frame
+from substrate.primitive_api import PrimitiveAPI, TelemetryOperator, CollapseViolation
+from substrate.collapse_primitives import (
+    KramersAscent,
+    CTMCAscent,
+    ThresholdAscent,
+    RegimeMismatchRule
+)
 
 def build_api():
-    # Collapse primitives
-    collapse = {
-        "nodiff": NoDiff(),
-        "nosame": NoSame(),
-        "composite": CompositeCollapse([NoDiff(), NoSame()])
-    }
-
-    # Ascent primitives
-    ascent = {
-        "dummy": DummyAscent()
-    }
-
-    # Telemetry
-    telemetry = SimpleTelemetry()
-
-    # Collapse validator
-    valid_op = ValidOp(collapse)
-
-    # Build API instance
-    return PrimitiveAPI(
-        collapse_primitives=collapse,
-        ascent_primitives=ascent,
-        telemetry=telemetry,
-        valid_op=valid_op
+    # Instantiate the refined API
+    api = PrimitiveAPI(
+        ascent_primitives={},
+        telemetry=TelemetryOperator(),
+        collapse_primitives={}
     )
+
+    # Register ascent-only primitives
+    api.register_ascent("kramers", KramersAscent())
+    api.register_ascent("ctmc", CTMCAscent())
+
+    # Register ascent + collapse for threshold domain
+    api.register_ascent("threshold", ThresholdAscent())
+    api.register_collapse("threshold_regime", RegimeMismatchRule())
+
+    return api
+
 
 if __name__ == "__main__":
     api = build_api()
 
-    print("SAFE CASE:")
-    print(api.run("dummy", raw=(None, [2])))
+    print("KRAMERS:")
+    print(api.run("kramers", raw={"x": 1.0}))
 
-    print("\nCOLLAPSE CASE (NoDiff triggers):")
-    try:
-        api.run("dummy", raw=(10, 20))
-    except Exception as e:
-        print("Collapsed:", e)
+    print("\nCTMC:")
+    print(api.run("ctmc", raw={"rate": 0.2}))
 
-    print("\nCOLLAPSE CASE (NoSame triggers):")
+    print("\nTHRESHOLD (safe):")
+    print(api.run("threshold", raw={"signal": 0.9}))
+
+    print("\nTHRESHOLD (collapse case):")
     try:
-        api.run("dummy", raw=([1], [1]))
-    except Exception as e:
+        api.run("threshold", raw={"signal": -999})  # invalid regime
+    except CollapseViolation as e:
         print("Collapsed:", e)
