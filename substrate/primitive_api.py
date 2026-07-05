@@ -20,7 +20,7 @@ class CollapsePrimitive:
 
 
 class AscentPrimitive:
-    def apply(self, frame, payload):
+    def apply(self, frame, raw):
         raise NotImplementedError
 
 
@@ -32,36 +32,38 @@ class TelemetryOperator:
         return {"raw": raw}
 
 
-class ValidOp:
-    def __init__(self, collapse_rules):
-        self.collapse_rules = collapse_rules
-
-    def enforce(self, frame):
-        for name, rule in self.collapse_rules.items():
-            if rule.check(frame):
-                raise CollapseViolation(f"Collapse triggered: {name}")
-
 class PrimitiveAPI:
-    def __init__(self, collapse_primitives, ascent_primitives, telemetry, valid_op):
-        self.collapse_primitives = collapse_primitives
-        self.ascent_primitives = ascent_primitives
-        self.telemetry = telemetry
-        self.valid_op = valid_op
+    """
+    Refined architecture:
+    - Ascent primitives are required.
+    - Collapse primitives are optional.
+    - ValidOp removed (collapse rules run directly if present).
+    - API runs cleanly with or without collapse.
+    """
+    def __init__(self, ascent_primitives=None, telemetry=None, collapse_primitives=None):
+        self.ascent_primitives = ascent_primitives or {}
+        self.collapse_primitives = collapse_primitives or {}
+        self.telemetry = telemetry or TelemetryOperator()
+
+    def has_collapse(self):
+        return len(self.collapse_primitives) > 0
 
     def run(self, primitive_name, raw):
         # Step 1: telemetry → frame (dict)
         frame = self.telemetry.ingest(raw)
 
-        # Step 2: collapse enforcement
-        self.valid_op.enforce(frame)
+        # Step 2: optional collapse enforcement
+        if self.has_collapse():
+            for name, rule in self.collapse_primitives.items():
+                if rule.check(frame):
+                    raise CollapseViolation(f"Collapse triggered: {name}")
 
-        # Step 3: ascent primitive
+        # Step 3: required ascent primitive
         primitive = self.ascent_primitives[primitive_name]
         return primitive.apply(frame, raw)
 
     def register_collapse(self, name, primitive):
         self.collapse_primitives[name] = primitive
-        self.valid_op = ValidOp(self.collapse_primitives)
 
     def register_ascent(self, name, primitive):
         self.ascent_primitives[name] = primitive
